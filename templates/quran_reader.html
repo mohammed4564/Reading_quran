@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Al-Quran Al-Kareem - Read Quran (30 Paras)</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+    <link rel="stylesheet" href="static/quran_reader.css">
+</head>
+<body>
+
+    <div class="nav-buttons">
+        <button class="nav-btn" onclick="goHome()">🏠</button>
+        <button class="nav-btn" id="menuBtn">☰</button>
+    </div>
+
+    <div class="sidebar" id="sidebar">
+        <button class="close-menu" id="closeMenu">✕</button>
+        <h3>📖 Menu</h3>
+        <ul>
+            <li><a onclick="goHome()">🏠 Home</a></li>
+            <li><a onclick="goToAudio()">🎵 Audio Recitation</a></li>
+            <li><a onclick="resetAllProgress()">🔄 Reset Progress</a></li>
+            <li><a onclick="showAbout()">ℹ️ About</a></li>
+        </ul>
+        <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid rgba(255,215,0,0.3);">
+            <p style="font-size: 0.7rem;">© 2025 Al-Quran App</p>
+        </div>
+    </div>
+    <div class="overlay" id="overlay"></div>
+
+    <div class="header">
+        <h1>📖 القرآن الکریم</h1>
+        <p>Complete 30 Paras (Juz) - Auto-saves your current page</p>
+        <div class="user-info" id="userInfoDisplay"></div>
+    </div>
+
+    <div class="content">
+        <div class="search-section">
+            <input type="text" id="searchInput" placeholder="🔍 Search by Para name or number...">
+        </div>
+
+        <div class="stats-bar" id="statsBar">
+            <span>📚 Total Paras: 30</span>
+            <span id="totalPagesRead">📖 Total Pages Read: 0</span>
+        </div>
+
+        <div class="table-wrapper">
+            <table class="quran-table" id="quranTable">
+                <thead>
+                    <tr>
+                        <th class="col-number">Sl no</th>
+                        <th class="col-name">Para Name</th>
+                        <th class="col-arabic">Arabic Name</th>
+                        <th class="col-actions">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="pdfModal" class="modal">
+        <div class="modal-header">
+            <div class="modal-title-section">
+                <h3 id="modalTitle">Reading Quran</h3>
+                <div class="page-tracker">
+                    <span>📄 Page: <span id="currentPageDisplay">1</span> / <span id="totalPages">22</span></span>
+                </div>
+                <div class="auto-save-indicator" id="autoSaveIndicator">💾 Auto-saving...</div>
+            </div>
+            <div style="display: flex; gap: 10px;">
+                <button class="fullscreen-btn" onclick="toggleFullscreen()">⛶ Fullscreen</button>
+                <button class="close-modal" onclick="closePDFViewer()">✕</button>
+            </div>
+        </div>
+        <div class="pdf-controls">
+            <button onclick="changePage(-1)">◀ Previous</button>
+            <span>Page <input type="number" id="pageInput" min="1" id="pageNumInput"> of <span id="totalPagesSpan">0</span></span>
+            <button onclick="changePage(1)">Next ▶</button>
+        </div>
+        <div class="pdf-container" id="pdfContainer">
+            <canvas id="pdfCanvas"></canvas>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>✨ Al-Quran Al-Kareem - The Holy Quran ✨</p>
+        <p>Powered by Umar Mohammed</p>
+    </div>
+
+    <script>
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
+        
+        const paras = [
+            { id: 1, name: "Para 1: Al-Fatiha", arabic_name: "الفاتحة", english_name: "Juz 1", totalPages: 22 },
+            { id: 2, name: "Para 2: Al-Baqarah", arabic_name: "البقرة", english_name: "Juz 2", totalPages: 22 },
+            { id: 3, name: "Para 3: Aal-E-Imran", arabic_name: "آل عمران", english_name: "Juz 3", totalPages: 22 },
+            { id: 4, name: "Para 4: An-Nisa", arabic_name: "النساء", english_name: "Juz 4", totalPages: 22 },
+            { id: 5, name: "Para 5: Al-Ma'idah", arabic_name: "المائدة", english_name: "Juz 5", totalPages: 22 },
+            { id: 6, name: "Para 6: Al-An'am", arabic_name: "الأنعام", english_name: "Juz 6", totalPages: 22 },
+            { id: 7, name: "Para 7: Al-A'raf", arabic_name: "الأعراف", english_name: "Juz 7", totalPages: 22 },
+            { id: 8, name: "Para 8: Al-Anfal", arabic_name: "الأنفال", english_name: "Juz 8", totalPages: 22 },
+            { id: 9, name: "Para 9: At-Tawbah", arabic_name: "التوبة", english_name: "Juz 9", totalPages: 22 },
+            { id: 10, name: "Para 10: Yunus", arabic_name: "يونس", english_name: "Juz 10", totalPages: 22 },
+            { id: 11, name: "Para 11: Hud", arabic_name: "هود", english_name: "Juz 11", totalPages: 22 },
+            { id: 12, name: "Para 12: Yusuf", arabic_name: "يوسف", english_name: "Juz 12", totalPages: 22 },
+            { id: 13, name: "Para 13: Ar-Ra'd", arabic_name: "الرعد", english_name: "Juz 13", totalPages: 22 },
+            { id: 14, name: "Para 14: Ibrahim", arabic_name: "إبراهيم", english_name: "Juz 14", totalPages: 22 },
+            { id: 15, name: "Para 15: Al-Hijr", arabic_name: "الحجر", english_name: "Juz 15", totalPages: 22 },
+            { id: 16, name: "Para 16: An-Nahl", arabic_name: "النحل", english_name: "Juz 16", totalPages: 22 },
+            { id: 17, name: "Para 17: Al-Isra", arabic_name: "الإسراء", english_name: "Juz 17", totalPages: 22 },
+            { id: 18, name: "Para 18: Al-Kahf", arabic_name: "الكهف", english_name: "Juz 18", totalPages: 22 },
+            { id: 19, name: "Para 19: Maryam", arabic_name: "مريم", english_name: "Juz 19", totalPages: 22 },
+            { id: 20, name: "Para 20: Ta-Ha", arabic_name: "طه", english_name: "Juz 20", totalPages: 22 },
+            { id: 21, name: "Para 21: Al-Anbiya", arabic_name: "الأنبياء", english_name: "Juz 21", totalPages: 22 },
+            { id: 22, name: "Para 22: Al-Hajj", arabic_name: "الحج", english_name: "Juz 22", totalPages: 22 },
+            { id: 23, name: "Para 23: Al-Mu'minun", arabic_name: "المؤمنون", english_name: "Juz 23", totalPages: 22 },
+            { id: 24, name: "Para 24: An-Nur", arabic_name: "النور", english_name: "Juz 24", totalPages: 22 },
+            { id: 25, name: "Para 25: Al-Furqan", arabic_name: "الفرقان", english_name: "Juz 25", totalPages: 22 },
+            { id: 26, name: "Para 26: Ash-Shu'ara", arabic_name: "الشعراء", english_name: "Juz 26", totalPages: 22 },
+            { id: 27, name: "Para 27: An-Naml", arabic_name: "النمل", english_name: "Juz 27", totalPages: 22 },
+            { id: 28, name: "Para 28: Al-Qasas", arabic_name: "القصص", english_name: "Juz 28", totalPages: 22 },
+            { id: 29, name: "Para 29: Al-'Ankabut", arabic_name: "العنكبوت", english_name: "Juz 29", totalPages: 22 },
+            { id: 30, name: "Para 30: Ar-Rum", arabic_name: "الروم", english_name: "Juz 30", totalPages: 22 }
+        ];
+
+        let readingProgress = {};
+        let currentUserId = null;
+        let currentParaId = null;
+        let autoSaveTimeout = null;
+        let currentPage = 1;
+        let pdfDoc = null;
+        let zoom = 1.5;
+
+        async function loadUserData() {
+            try {
+                const response = await fetch('/api/user-info');
+                const data = await response.json();
+                currentUserId = data.user_id;
+                const shortId = currentUserId ? currentUserId.substring(0, 8) : 'Guest';
+                document.getElementById('userInfoDisplay').innerHTML = `👤 Session: ${shortId}... | Auto-saved`;
+                
+                const progressResponse = await fetch('/api/reading-progress');
+                const progress = await progressResponse.json();
+                readingProgress = progress;
+                
+                paras.forEach(para => {
+                    if (!readingProgress[para.id]) {
+                        readingProgress[para.id] = { page: 1 };
+                    }
+                });
+                
+                updateStatsBar();
+                renderTable();
+            } catch (error) {
+                console.error('Error:', error);
+                initializeLocalProgress();
+            }
+        }
+
+        function initializeLocalProgress() {
+            paras.forEach(para => {
+                readingProgress[para.id] = { page: 1 };
+            });
+            updateStatsBar();
+            renderTable();
+        }
+
+        async function saveProgressToServer() {
+            try {
+                await fetch('/api/reading-progress', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(readingProgress)
+                });
+            } catch (error) {
+                console.error('Error saving progress:', error);
+            }
+            updateStatsBar();
+            renderTable();
+        }
+
+        function autoSaveCurrentPage() {
+            if (autoSaveTimeout) clearTimeout(autoSaveTimeout);
+            
+            autoSaveTimeout = setTimeout(async () => {
+                if (currentParaId && currentPage) {
+                    if (readingProgress[currentParaId]) {
+                        const oldPage = readingProgress[currentParaId].page;
+                        if (oldPage !== currentPage) {
+                            readingProgress[currentParaId].page = currentPage;
+                            await saveProgressToServer();
+                            
+                            const indicator = document.getElementById('autoSaveIndicator');
+                            if (indicator) {
+                                indicator.style.background = '#27ae60';
+                                indicator.innerHTML = '💾 Saved!';
+                                setTimeout(() => {
+                                    indicator.innerHTML = '💾 Auto-saving...';
+                                }, 1500);
+                            }
+                        }
+                    }
+                }
+            }, 1000);
+        }
+
+        function updateStatsBar() {
+            let totalPagesRead = 0;
+            paras.forEach(para => {
+                const progress = readingProgress[para.id];
+                if (progress) totalPagesRead += (progress.page - 1);
+            });
+            document.getElementById('totalPagesRead').innerHTML = `📖 Total Pages Read: ${totalPagesRead}`;
+        }
+
+        function getSavedPage(paraId) {
+            return readingProgress[paraId] ? readingProgress[paraId].page : 1;
+        }
+
+        async function resetAllProgress() {
+            if (confirm('⚠️ Reset ALL reading progress? This cannot be undone.')) {
+                paras.forEach(para => { readingProgress[para.id] = { page: 1 }; });
+                await saveProgressToServer();
+                alert('✅ All progress has been reset!');
+                renderTable();
+            }
+            closeMenuFunc();
+        }
+
+        function downloadPDF(paraId, paraName) {
+            const pdfUrl = `/static/pdf/Holy-Quran-Para-${paraId}.pdf`;
+            const link = document.createElement('a');
+            link.href = pdfUrl;
+            link.download = `Holy-Quran-Para-${paraId}.pdf`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        async function renderPage(pageNum) {
+            if (!pdfDoc) return;
+            
+            try {
+                const page = await pdfDoc.getPage(pageNum);
+                const viewport = page.getViewport({ scale: zoom });
+                const canvas = document.getElementById('pdfCanvas');
+                const context = canvas.getContext('2d');
+                
+                canvas.height = viewport.height;
+                canvas.width = viewport.width;
+                
+                await page.render({ canvasContext: context, viewport: viewport }).promise;
+                
+                document.getElementById('currentPageDisplay').innerHTML = pageNum;
+                document.getElementById('pageInput').value = pageNum;
+                currentPage = pageNum;
+                autoSaveCurrentPage();
+            } catch (error) {
+                console.error('Error rendering page:', error);
+            }
+        }
+
+        function changePage(delta) {
+            if (!pdfDoc) return;
+            let newPage = currentPage + delta;
+            if (newPage >= 1 && newPage <= pdfDoc.numPages) {
+                renderPage(newPage);
+            }
+        }
+        
+        function goToPage() {
+            const input = document.getElementById('pageInput');
+            let pageNum = parseInt(input.value);
+            if (pdfDoc && pageNum >= 1 && pageNum <= pdfDoc.numPages) {
+                renderPage(pageNum);
+            } else if (pdfDoc) {
+                input.value = currentPage;
+            }
+        }
+
+        async function openPDFViewer(paraId, paraName) {
+            currentParaId = paraId;
+            const savedPage = getSavedPage(paraId);
+            
+            document.getElementById('modalTitle').innerHTML = `📖 Reading: ${paraName}`;
+            const pdfUrl = `/static/pdf/Holy-Quran-Para-${paraId}.pdf`;
+            
+            try {
+                const loadingTask = pdfjsLib.getDocument(pdfUrl);
+                pdfDoc = await loadingTask.promise;
+                
+                const totalPages = pdfDoc.numPages;
+                document.getElementById('totalPages').innerHTML = totalPages;
+                document.getElementById('totalPagesSpan').innerHTML = totalPages;
+                const pageInput = document.getElementById('pageInput');
+                pageInput.max = totalPages;
+                pageInput.onchange = goToPage;
+                
+                currentPage = Math.min(savedPage, totalPages);
+                await renderPage(currentPage);
+                
+                document.getElementById('pdfModal').classList.add('active');
+                document.body.style.overflow = 'hidden';
+            } catch (error) {
+                console.error('Error loading PDF:', error);
+                alert('Error loading PDF. Please check if the file exists.');
+            }
+        }
+        
+        function closePDFViewer() {
+            document.getElementById('pdfModal').classList.remove('active');
+            const canvas = document.getElementById('pdfCanvas');
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            document.body.style.overflow = '';
+            if (autoSaveTimeout) clearTimeout(autoSaveTimeout);
+            pdfDoc = null;
+        }
+        
+        function toggleFullscreen() {
+            const modal = document.getElementById('pdfModal');
+            if (!document.fullscreenElement) {
+                modal.requestFullscreen().catch(err => console.log(err));
+            } else {
+                document.exitFullscreen();
+            }
+        }
+        
+        const menuBtn = document.getElementById('menuBtn');
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('overlay');
+        const closeMenuBtn = document.getElementById('closeMenu');
+
+        function openMenu() {
+            sidebar.classList.add('active');
+            overlay.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeMenuFunc() {
+            sidebar.classList.remove('active');
+            overlay.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        menuBtn.addEventListener('click', openMenu);
+        menuBtn.addEventListener('touchstart', (e) => { e.preventDefault(); openMenu(); });
+        closeMenuBtn.addEventListener('click', closeMenuFunc);
+        overlay.addEventListener('click', closeMenuFunc);
+
+        function goHome() { window.location.href = '/'; }
+        function goToAudio() { window.location.href = '/audio-recitation'; }
+        function showAbout() {
+            closeMenuFunc();
+            alert(`📖 Al-Quran Al-Kareem\n\nComplete Quran Application\n✅ Auto-saves your current page\n✅ Continues where you left off\n✅ 30 Paras with PDF viewer\n✅ Download each Para\n\nDeveloper: Umar Mohammed\n\nMay Allah bless you!`);
+        }
+        
+        function renderTable() {
+            const search = document.getElementById('searchInput').value.toLowerCase();
+            const filtered = paras.filter(p => 
+                p.name.toLowerCase().includes(search) || 
+                p.id.toString().includes(search) ||
+                p.arabic_name.includes(search)
+            );
+
+            const tableBody = document.getElementById('tableBody');
+            
+            if (filtered.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="4" class="empty-state">📚 No paras found. Try another search.</td></tr>';
+                return;
+            }
+
+            tableBody.innerHTML = filtered.map(para => {
+                const savedPage = getSavedPage(para.id);
+                const totalPages = para.totalPages;
+                const progressPercent = Math.round((savedPage - 1) / totalPages * 100);
+                const progressText = savedPage > 1 ? `<span class="progress-badge">📖 Page ${savedPage}/${totalPages} (${progressPercent}%)</span>` : `<span class="progress-badge">📖 Start from Page 1</span>`;
+                
+                return `
+                    <tr>
+                        <td class="col-number"><strong>${para.id}</strong></td>
+                        <td class="col-name">
+                            <strong>${para.name}</strong><br>
+                            <small style="color: #666;">${para.english_name}</small>
+                            ${progressText}
+                        </td>
+                        <td class="col-arabic">
+                            <div class="arabic-text">${para.arabic_name}</div>
+                        </td>
+                        <td class="col-actions">
+                            <button class="btn btn-view" onclick="openPDFViewer(${para.id}, '${para.name.replace(/'/g, "\\'")}')">
+                                📖 Read
+                            </button>
+                            <button class="btn btn-download" onclick="downloadPDF(${para.id}, '${para.name.replace(/'/g, "\\'")}')">
+                                💾 Download
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        document.getElementById('searchInput').addEventListener('input', renderTable);
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                if (document.getElementById('pdfModal').classList.contains('active')) {
+                    closePDFViewer();
+                }
+                if (sidebar.classList.contains('active')) {
+                    closeMenuFunc();
+                }
+            }
+        });
+
+        loadUserData();
+
+        window.goHome = goHome;
+        window.goToAudio = goToAudio;
+        window.showAbout = showAbout;
+        window.resetAllProgress = resetAllProgress;
+        window.openPDFViewer = openPDFViewer;
+        window.closePDFViewer = closePDFViewer;
+        window.toggleFullscreen = toggleFullscreen;
+        window.downloadPDF = downloadPDF;
+        window.changePage = changePage;
+    </script>
+</body>
+</html>
