@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>
+        {% block title %}
+        Al-Quran-ul-Kareem
+        {% endblock %}
+    </title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
+    {% block head %}
+    {% endblock %}
+
+</head>
+
+
+<body>
+
+
+    <header>
+
+        <nav>
+
+            <div class="nav-brand">
+                Al-Quran-ul-Kareem
+            </div>
+
+
+            <div class="nav-links">
+
+              
+                    <a href="/">Home</a>
+             
+          
+
+            </div>
+
+        </nav>
+
+    </header>
+
+
+    <main>
+
+        {% block content %}
+        {% endblock %}
+
+    </main>
+
+
+    <footer>
+
+       
+
+        <p>
+            © 2026 Al-Quran-ul-Kareem. All rights reserved.
+        </p>
+
+    </footer>
+
+
+    {% block scripts %}
+    {% endblock %}
+
+
+</body>
+
+</html>

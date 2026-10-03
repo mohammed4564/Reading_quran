@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+
+
+{% block title %}
+Al-Quran-ul-Kareem
+{% endblock %}
+
+
+{% block head %}
+
+<link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
+
+{% endblock %}
+
+
+{% block content %}
+
+
+<section class="hero">
+
+</section>
+
+<section class="resources">
+
+    <h2>
+        Welcome to the Quran
+    </h2>
+
+    <p>
+        Take a moment to read, listen, and reflect on the words of Allah.
+        Let the Quran bring guidance, peace, and meaning to your daily life.
+    </p>
+
+
+    <div class="resource-grid">
+
+        <div class="resource-card">
+
+            <h3>
+                Read Quran
+            </h3>
+
+            <p>
+                Read the Quran online and continue from where you stopped.
+            </p>
+
+            <a href="/read-quran" class="card-button">
+                Read Quran
+            </a>
+
+        </div>
+
+
+    
+
+        <div class="resource-card">
+
+            <h3>
+                Listen to Quran Audio with Translation
+            </h3>
+
+            <p>
+                Listen to the translation of the Quran in your preferred language.
+            </p>
+
+            <a href="/translation-quran" class="card-button">
+                Listen to Audio
+            </a>
+          
+
+        </div>
+
+
+    </div>
+
+</section>
+
+{% endblock %}

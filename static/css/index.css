@@ -1,0 +1,157 @@
+/* =========================================================
+   Hero
+   ========================================================= */
+
+.hero {
+    background-image: url("../media/quran-image-banner.jpg");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+
+    width: 100%;
+    min-height: 45vh;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+
+    text-align: center;
+    position: relative;
+    box-sizing: border-box;
+    padding: 40px 20px;
+}
+
+/* Dark overlay */
+.hero::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+}
+
+.hero > * {
+    position: relative;
+    z-index: 1;
+}
+
+.hero h1 {
+    color: #fff;
+    font-size: clamp(28px, 5vw, 42px);
+    margin: 0 0 15px;
+}
+
+.hero p {
+    color: #fff;
+    font-size: clamp(15px, 2vw, 18px);
+    margin: 0 0 25px;
+}
+
+/* =========================================================
+   Resources section
+   ========================================================= */
+
+.resources {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 60px 20px;
+}
+
+.resources h2 {
+    text-align: center;
+    margin: 0 0 20px;
+    color: #18352b;
+}
+
+.resources > p {
+    text-align: center;
+    margin: 0 auto 40px;
+    max-width: 700px;
+    color: #18352b;
+}
+
+/* =========================================================
+   Resource grid + cards
+   ========================================================= */
+
+.resource-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    justify-items: center;   /* center each card in its cell */
+}
+
+.resource-card {
+    background: #fff;
+    border: 1px solid #ddd;
+    padding: 25px;
+    border-radius: 8px;
+    width: 100%;
+    text-align: center;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;      /* center h3, p, button horizontally */
+    justify-content: space-between;
+
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.resource-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+}
+
+.resource-card h3 {
+    color: #18352b;
+    margin: 0 0 10px;
+}
+
+.resource-card p {
+    color: #666;
+    margin: 0 0 20px;
+    flex: 1;
+}
+
+.card-button {
+    display: inline-block;
+    background: #18352b;
+    color: #fff;
+    text-decoration: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    font-size: 14px;
+    font-weight: 600;
+    transition: background 0.2s ease;
+}
+
+.card-button:hover {
+    background: #285545;
+}
+
+/* =========================================================
+   Mobile
+   ========================================================= */
+
+@media (max-width: 900px) {
+    .resource-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 600px) {
+
+    .hero {
+        min-height: 35vh;
+    }
+
+    .resource-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .card-button {
+        width: 100%;
+        text-align: center;
+    }
+}
